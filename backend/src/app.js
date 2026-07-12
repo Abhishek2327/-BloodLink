@@ -18,8 +18,17 @@ const app = express();
 // This allows Express to correctly detect HTTPS requests behind a reverse proxy
 app.set('trust proxy', 1);
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://blood-link-ashen.vercel.app";
-const ALLOWED_ORIGINS = [FRONTEND_URL, "http://localhost:1234", "http://localhost:57308"];
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const ALLOWED_ORIGINS = [
+    "https://bloodlink-drab.vercel.app",
+    "https://blood-link-ashen.vercel.app",
+    "http://localhost:1234",
+    "http://localhost:57308"
+];
+
+if (FRONTEND_URL) {
+    ALLOWED_ORIGINS.push(FRONTEND_URL);
+}
 
 // CORS configuration with proper origin handling
 app.use(cors({
@@ -27,10 +36,20 @@ app.use(cors({
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         
-        if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+        // Normalize origin: trim trailing slash and convert to lowercase for comparison
+        const cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+        
+        const isAllowed = ALLOWED_ORIGINS.some(allowed => {
+            const cleanAllowed = allowed.endsWith('/') ? allowed.slice(0, -1) : allowed;
+            return cleanAllowed.toLowerCase() === cleanOrigin.toLowerCase();
+        });
+
+        if (isAllowed) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            // Log warning but return null, false to avoid throwing 500 error in Express
+            console.warn(`Blocked CORS request from origin: ${origin}`);
+            callback(null, false);
         }
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
