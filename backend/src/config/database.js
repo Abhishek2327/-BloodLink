@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
-    await mongoose.connect("mongodb+srv://shashank23154:JIgIwELZzczgsNmH@db154.mxyqrt4.mongodb.net/BloodLink");
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+        throw new Error("MONGODB_URI is not defined in backend/.env!");
+    }
+    await mongoose.connect(uri);
 }
 
 module.exports = connectDB;
