@@ -18,8 +18,8 @@ const app = express();
 // This allows Express to correctly detect HTTPS requests behind a reverse proxy
 app.set('trust proxy', 1);
 
-const FRONTEND_URL = "https://blood-link-ashen.vercel.app";
-const ALLOWED_ORIGINS = [FRONTEND_URL, "http://localhost:1234"];
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://blood-link-ashen.vercel.app";
+const ALLOWED_ORIGINS = [FRONTEND_URL, "http://localhost:1234", "http://localhost:57308"];
 
 // CORS configuration with proper origin handling
 app.use(cors({
