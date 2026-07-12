@@ -83,6 +83,10 @@ const registerDonor = async (req, res) => {
 
 const sendOtpEmailService = async (email, otp) => {
   try {
+    if (process.env.RESEND_API_KEY === 're_dummy_key_for_testing' || !process.env.RESEND_API_KEY) {
+      console.log(`[DEVELOPMENT MODE] Bypass email send. OTP for ${email} is: ${otp}`);
+      return;
+    }
     await resend.emails.send({
       from: 'BloodLink <onboarding@resend.dev>', // Update this with your verified domain
       to: email,
