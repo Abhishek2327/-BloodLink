@@ -2,18 +2,18 @@ require('dotenv').config();
 const { Resend } = require('resend');
 
 // Initialize Resend client
-if (!process.env.RESEND_API_KEY) {
-  console.error('❌ RESEND_API_KEY missing in .env');
-  process.exit(1);
+let resend;
+if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_dummy_key_for_testing') {
+  console.log('⚠️  RESEND_API_KEY is missing or using placeholder in .env. Email service will run in development bypass mode.');
+} else {
+  resend = new Resend(process.env.RESEND_API_KEY);
 }
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuffer) => {
   // Check if Resend API key is configured
-  if (!process.env.RESEND_API_KEY) {
+  if (!resend) {
     console.log('⚠️  RESEND_API_KEY not configured. Skipping email notification.');
-    console.log('Please set up RESEND_API_KEY in backend/.env file');
+    console.log(`[DEVELOPMENT MODE] By-passed sending donation completion email to: ${donorEmail}`);
     return false;
   }
 
