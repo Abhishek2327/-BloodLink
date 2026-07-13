@@ -55,7 +55,7 @@ const registerDonor = async (req, res) => {
 
     // Auto-login: Generate token and set cookie
     const token = jwt.sign({ _id: donor._id }, "bloodlink.iiitu.2025");
-    
+
     // For production (HTTPS): secure: true, sameSite: 'none' (required for cross-origin)
     // For development (HTTP): secure: false, sameSite: 'lax'
     // Check if production: NODE_ENV or if request is secure (HTTPS)
@@ -83,35 +83,69 @@ const registerDonor = async (req, res) => {
 
 const sendOtpEmailService = async (email, otp) => {
   try {
-    if (process.env.RESEND_API_KEY === 're_dummy_key_for_testing' || !process.env.RESEND_API_KEY) {
-      console.log(`[DEVELOPMENT MODE] Bypass email send. OTP for ${email} is: ${otp}`);
+
+    if (
+      process.env.RESEND_API_KEY === "re_dummy_key_for_testing" ||
+      !process.env.RESEND_API_KEY
+    ) {
+      console.log(`[DEV MODE] OTP for ${email} = ${otp}`);
       return;
     }
-    await resend.emails.send({
-      from: 'BloodLink <onboarding@resend.dev>', // Update this with your verified domain
+
+    console.log("====================================");
+    console.log("Sending OTP email...");
+    console.log("Recipient:", email);
+    console.log("Sender: BloodLink <onboarding@resend.dev>");
+    console.log("Subject: Your OTP Code");
+    console.log(
+      "API Key exists:",
+      !!process.env.RESEND_API_KEY
+    );
+    console.log("====================================");
+
+    const response = await resend.emails.send({
+
+      from: "BloodLink <onboarding@resend.dev>",
+
       to: email,
-      subject: 'Your OTP Code',
+
+      subject: "Your OTP Code",
+
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #6B1F1F;">BloodLink Verification Code</h2>
-          <p>Your verification code is:</p>
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
-            <h1 style="color: #6B1F1F; margin: 0; font-size: 32px; letter-spacing: 5px;">${otp}</h1>
-          </div>
-          <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
-          <p style="color: #666; font-size: 12px; margin-top: 20px;">If you didn't request this code, please ignore this email.</p>
-        </div>
+      <h2>BloodLink Verification</h2>
+
+      <p>Your OTP is:</p>
+
+      <h1>${otp}</h1>
+
+      <p>Expires in 10 minutes.</p>
       `
     });
-    console.log(`✅ OTP email sent to ${email}`);
-  } catch (error) {
-    console.error('❌ Error sending OTP email:', error);
-    throw error;
+
+    console.log("========== RESEND RESPONSE ==========");
+    console.dir(response, { depth: null });
+    console.log("====================================");
+
+    if (response.error) {
+      console.error("❌ RESEND ERROR");
+      console.dir(response.error, { depth: null });
+      throw response.error;
+    }
+
+    console.log("✅ Email accepted by Resend");
+
+  } catch (err) {
+
+    console.error("❌ Error sending OTP");
+
+    console.dir(err, { depth: null });
+
+    throw err;
   }
 };
 
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString(); 
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 // New endpoint: Send OTP for email verification during registration (only requires email)
@@ -142,7 +176,7 @@ const sendRegistrationOTP = async (req, res) => {
       // Create temporary donor record with placeholder values (will be updated during final registration)
       // Generate unique temporary contact number to avoid conflicts
       const tempContactNumber = `000000${Date.now().toString().slice(-4)}`; // Last 4 digits of timestamp
-      
+
       const tempDonor = new Donor({
         email,
         otp,
@@ -159,9 +193,9 @@ const sendRegistrationOTP = async (req, res) => {
     // Send OTP to email
     await sendOtpEmailService(email, otp);
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: 'Verification code sent successfully to your email.',
-      email: email 
+      email: email
     });
 
   } catch (error) {
@@ -194,9 +228,9 @@ const verifyRegistrationOTP = async (req, res) => {
     }
 
     // OTP is valid - return success (OTP will be verified again during final registration)
-    res.status(200).json({ 
+    res.status(200).json({
       message: 'Email verified successfully!',
-      verified: true 
+      verified: true
     });
 
   } catch (error) {
@@ -262,7 +296,7 @@ const loginDonor = async (req, res) => {
     await donor.save();
 
     const token = jwt.sign({ _id: donor._id }, "bloodlink.iiitu.2025");
-    
+
     // For production (HTTPS): secure: true, sameSite: 'none' (required for cross-origin)
     // For development (HTTP): secure: false, sameSite: 'lax'
     // Check if production: NODE_ENV or if request is secure (HTTPS)
@@ -285,7 +319,7 @@ const loginDonor = async (req, res) => {
 };
 
 const getAllDonors = async (req, res) => {
-  try{
+  try {
     const allDonors = await Donor.find({});
     res.status(200).json(allDonors);
   } catch (error) {
@@ -318,7 +352,7 @@ const updateAvailability = async (req, res) => {
     } catch (err) {
       return res.status(401).json({ message: 'Invalid or expired token.' });
     }
-    
+
     // --- FIX ---
     // The decoded token from jwt.sign contains { _id: donor._id }.
     // So you should use decoded._id, not decoded.id
@@ -373,7 +407,7 @@ const getDonorById = async (req, res) => {
     if (!donor) {
       return res.status(404).json({ message: 'Donor not found.' });
     }
-    
+
     // --- CHANGE ---
     // Previously, you returned { message: '...', donor }.
     // The frontend's refresh function expects the donor object directly.
@@ -389,7 +423,7 @@ const getDonorById = async (req, res) => {
 const getDonorStats = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Verify authentication
     const token = req.cookies?.token;
     if (!token) {
@@ -409,7 +443,7 @@ const getDonorStats = async (req, res) => {
     }
 
     const BloodRequest = require('../models/BloodRequest');
-    
+
     // Count completed donations
     const totalDonations = await BloodRequest.countDocuments({
       donor: id,
