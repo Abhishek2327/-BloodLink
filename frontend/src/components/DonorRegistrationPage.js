@@ -149,7 +149,7 @@ function DonorRegistrationPage() {
     const handleBlur = (e) => {
         const { name, value } = e.target;
         setTouchedFields(prev => ({ ...prev, [name]: true }));
-        
+
         const error = validateField(name, value);
         if (error) {
             setFieldErrors(prev => ({ ...prev, [name]: error }));
@@ -175,7 +175,7 @@ function DonorRegistrationPage() {
         });
 
         setFieldErrors(errors);
-        
+
         // Mark all fields as touched
         const allTouched = {};
         Object.keys(formData).forEach(key => {
@@ -330,7 +330,7 @@ function DonorRegistrationPage() {
 
             // Auto-login the user
             login({ type: 'donor', ...data.donor });
-            
+
             // Redirect to donor dashboard
             navigate('/donor-dashboard');
 
@@ -357,22 +357,22 @@ function DonorRegistrationPage() {
                             <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">Become a Lifesaver</h2>
                             <p className="text-sm md:text-base text-gray-600">Join our community of heroes. Fill out the form below to start saving lives.</p>
                         </div>
-                        
+
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Full Name */}
                             <div className="space-y-1.5">
                                 <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700">
                                     Full Name <span className="text-red-500">*</span>
                                 </label>
-                                <input 
-                                    type="text" 
-                                    id="fullName" 
-                                    name="fullName" 
-                                    value={formData.fullName || ''} 
+                                <input
+                                    type="text"
+                                    id="fullName"
+                                    name="fullName"
+                                    value={formData.fullName || ''}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
-                                    placeholder="e.g., Shashank Sharma" 
-                                    required 
+                                    placeholder="e.g., Aakanksha Sharma"
+                                    required
                                     className={`input-modern ${fieldErrors.fullName ? 'border-red-500 focus:ring-red-500' : ''}`}
                                 />
                                 {fieldErrors.fullName && (
@@ -391,16 +391,16 @@ function DonorRegistrationPage() {
                                     <label htmlFor="contactNumber" className="block text-sm font-semibold text-gray-700">
                                         Contact Number <span className="text-red-500">*</span>
                                     </label>
-                                    <input 
-                                        type="tel" 
-                                        id="contactNumber" 
-                                        name="contactNumber" 
-                                        value={formData.contactNumber || ''} 
+                                    <input
+                                        type="tel"
+                                        id="contactNumber"
+                                        name="contactNumber"
+                                        value={formData.contactNumber || ''}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        placeholder="10-digit mobile number" 
+                                        placeholder="10-digit mobile number"
                                         maxLength="10"
-                                        required 
+                                        required
                                         className={`input-modern ${fieldErrors.contactNumber ? 'border-red-500 focus:ring-red-500' : ''}`}
                                     />
                                     {fieldErrors.contactNumber && (
@@ -418,11 +418,11 @@ function DonorRegistrationPage() {
                                     </label>
                                     <div className="flex gap-2">
                                         <div className="relative flex-1">
-                                            <input 
-                                                type="email" 
-                                                id="email" 
-                                                name="email" 
-                                                value={formData.email || ''} 
+                                            <input
+                                                type="email"
+                                                id="email"
+                                                name="email"
+                                                value={formData.email || ''}
                                                 onChange={(e) => {
                                                     handleChange(e);
                                                     if (otpSent) {
@@ -432,8 +432,8 @@ function DonorRegistrationPage() {
                                                     }
                                                 }}
                                                 onBlur={handleBlur}
-                                                placeholder="you@example.com" 
-                                                required 
+                                                placeholder="you@example.com"
+                                                required
                                                 disabled={!emailEditable}
                                                 className={`input-modern w-full pr-10 ${fieldErrors.email ? 'border-red-500 focus:ring-red-500' : ''} ${!emailEditable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                             />
@@ -503,10 +503,10 @@ function DonorRegistrationPage() {
                                         Enter Verification Code <span className="text-red-500">*</span>
                                     </label>
                                     <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            id="otp" 
-                                            name="otp" 
+                                        <input
+                                            type="text"
+                                            id="otp"
+                                            name="otp"
                                             value={otp}
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/\D/g, '').slice(0, 6);
@@ -514,8 +514,8 @@ function DonorRegistrationPage() {
                                                 if (error) setError('');
                                                 if (otpVerified) setOtpVerified(false);
                                             }}
-                                            placeholder="000000" 
-                                            required 
+                                            placeholder="000000"
+                                            required
                                             maxLength={6}
                                             disabled={otpVerified}
                                             className={`input-modern flex-1 text-center text-lg font-semibold tracking-[0.3em] placeholder:tracking-[0.3em] placeholder:text-gray-300 ${otpVerified ? 'bg-green-50 border-green-500' : ''}`}
@@ -557,17 +557,17 @@ function DonorRegistrationPage() {
                                     <label htmlFor="age" className="block text-sm font-semibold text-gray-700">
                                         Age <span className="text-red-500">*</span>
                                     </label>
-                                    <input 
-                                        type="number" 
-                                        id="age" 
-                                        name="age" 
-                                        value={formData.age || ''} 
+                                    <input
+                                        type="number"
+                                        id="age"
+                                        name="age"
+                                        value={formData.age || ''}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        min="18" 
+                                        min="18"
                                         max="65"
-                                        placeholder="e.g., 25" 
-                                        required 
+                                        placeholder="e.g., 25"
+                                        required
                                         className={`input-modern ${fieldErrors.age ? 'border-red-500 focus:ring-red-500' : ''}`}
                                     />
                                     {fieldErrors.age && (
@@ -583,13 +583,13 @@ function DonorRegistrationPage() {
                                     <label htmlFor="bloodGroup" className="block text-sm font-semibold text-gray-700">
                                         Blood Group <span className="text-red-500">*</span>
                                     </label>
-                                    <select 
-                                        id="bloodGroup" 
-                                        name="bloodGroup" 
-                                        value={formData.bloodGroup || ''} 
+                                    <select
+                                        id="bloodGroup"
+                                        name="bloodGroup"
+                                        value={formData.bloodGroup || ''}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        required 
+                                        required
                                         className={`input-modern ${fieldErrors.bloodGroup ? 'border-red-500 focus:ring-red-500' : ''}`}
                                     >
                                         <option value="">Select Blood Group</option>
@@ -619,15 +619,15 @@ function DonorRegistrationPage() {
                                     <label htmlFor="location" className="block text-sm font-semibold text-gray-700">
                                         Location <span className="text-red-500">*</span>
                                     </label>
-                                    <input 
-                                        type="text" 
-                                        id="location" 
-                                        name="location" 
-                                        value={formData.location || ''} 
+                                    <input
+                                        type="text"
+                                        id="location"
+                                        name="location"
+                                        value={formData.location || ''}
                                         onChange={handleChange}
                                         onBlur={handleBlur}
-                                        placeholder="e.g., Una, Himachal Pradesh" 
-                                        required 
+                                        placeholder="e.g., Una, Himachal Pradesh"
+                                        required
                                         className={`input-modern ${fieldErrors.location ? 'border-red-500 focus:ring-red-500' : ''}`}
                                     />
                                     {fieldErrors.location && (
@@ -643,10 +643,10 @@ function DonorRegistrationPage() {
                                     <label htmlFor="gender" className="block text-sm font-semibold text-gray-700">
                                         Gender
                                     </label>
-                                    <select 
-                                        id="gender" 
-                                        name="gender" 
-                                        value={formData.gender || ''} 
+                                    <select
+                                        id="gender"
+                                        name="gender"
+                                        value={formData.gender || ''}
                                         onChange={handleChange}
                                         className="input-modern"
                                     >
@@ -657,7 +657,7 @@ function DonorRegistrationPage() {
                                     </select>
                                 </div>
                             </div>
-                            
+
                             {/* Error Message Display */}
                             {error && (
                                 <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg animate-fade-in-up">
@@ -672,9 +672,9 @@ function DonorRegistrationPage() {
 
                             {/* Submit Button */}
                             <div className="pt-2">
-                                <button 
-                                    type="submit" 
-                                    disabled={isLoading || Object.keys(fieldErrors).length > 0 || !otpVerified} 
+                                <button
+                                    type="submit"
+                                    disabled={isLoading || Object.keys(fieldErrors).length > 0 || !otpVerified}
                                     className="w-full btn-primary text-base md:text-lg py-3 md:py-3.5 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? (
@@ -698,15 +698,15 @@ function DonorRegistrationPage() {
                         <div className="relative mb-6">
                             <img src={formImg} alt="Donor Registration Illustration" className="w-full max-w-md animate-float" />
                             <div className="absolute -top-4 -right-4 w-8 h-8 bg-red-500 rounded-full animate-pulse"></div>
-                            <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-red-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                            <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-red-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <h3 className="text-2xl font-bold text-gray-900">Thank You for Your Courage!</h3>
                             <p className="text-sm text-gray-600 max-w-md">
                                 Your registration is the first step towards saving lives. We appreciate your commitment to making a difference in our community.
                             </p>
-                            
+
                             {/* Benefits List */}
                             <div className="space-y-3 text-left max-w-xs mx-auto">
                                 <div className="flex items-center space-x-3">
