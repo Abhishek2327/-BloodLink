@@ -1,6 +1,6 @@
-# BloodLink Una - Blood Donation Management System
+# 🩸 BloodLink - Blood Donation Management System
 
-BloodLink Una is a modern web application designed to bridge the gap between voluntary blood donors and the Government Hospital in Una, Himachal Pradesh. The platform provides a streamlined path for donors to register, verify their emails, check donation requests, and manage availability, while enabling hospital staff to request blood units, track history, and reward donations with digital certificates.
+BloodLink is a modern full-stack web application designed to bridge the gap between voluntary blood donors and hospitals through a secure and digital platform. It provides a streamlined workflow for donor registration, OTP-based email verification, blood request management, real-time notifications, health tracking, and automated digital certificate generation. The platform enables hospitals to efficiently manage blood requests while offering donors a seamless and engaging donation experience.
 
 ---
 
@@ -11,6 +11,16 @@ BloodLink Una is a modern web application designed to bridge the gap between vol
 *   **Hospital Portal**: Secure hospital dashboard allowing staff to search for available donors by blood group in real-time and send emergency requests.
 *   **Certificate & Badge System**: Digital certificate generation (with PDF download benefits) and badges awarded to repeat donors.
 *   **Real-time Notifications**: Server-Sent Events (SSE) notifying donors instantly about emergency blood requests.
+*   **JWT Authentication**: Secure authentication using HTTP-only cookies.
+*   **Email Automation**: OTP verification and donation completion emails powered by Resend API.
+*   **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices.
+
+---
+
+## 🌐 Live Demo
+
+- **Frontend:** https://bloodlink-drab.vercel.app
+- **Backend:** https://bloodlink-backend-zux8.onrender.com
 
 ---
 
@@ -29,6 +39,7 @@ BloodLink Una is a modern web application designed to bridge the gap between vol
 *   **JWT & Cookies**: Secure token-based authentication session handling.
 *   **Resend API**: High-deliverability transactional email delivery (with fallback in local development).
 *   **PDFKit**: Dynamic PDF certificate generation.
+*   **bcrypt**: Password hashing for secure authentication.
 
 ---
 
@@ -73,6 +84,7 @@ Create a file named `.env` in the `backend/` directory:
 PORT=5555
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/BloodLink?retryWrites=true&w=majority
 RESEND_API_KEY=your_resend_api_key_here
+FRONTEND_URL=https://bloodlink-drab.vercel.app
 NODE_ENV=development
 ```
 
