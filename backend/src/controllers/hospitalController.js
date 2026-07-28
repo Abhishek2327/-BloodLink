@@ -192,10 +192,62 @@ const changeHospitalPassword = async (req, res) => {
   }
 };
 
+// Register New Hospital
+const registerHospital = async (req, res) => {
+  const { name, email, password, phone, address, license } = req.body;
+
+  if (!name || !email || !password || !phone || !address || !license) {
+    return res.status(400).json({ message: 'All fields (name, email, password, phone, address, license) are required.' });
+  }
+
+  try {
+    const existingEmail = await Hospital.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: 'Hospital with this email already exists.' });
+    }
+
+    const existingLicense = await Hospital.findOne({ license });
+    if (existingLicense) {
+      return res.status(400).json({ message: 'Hospital with this license already exists.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newHospital = new Hospital({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      address,
+      license
+    });
+
+    await newHospital.save();
+
+    res.status(201).json({
+      message: 'Hospital created successfully.',
+      hospital: {
+        _id: newHospital._id,
+        name: newHospital.name,
+        email: newHospital.email,
+        phone: newHospital.phone,
+        address: newHospital.address,
+        license: newHospital.license
+      }
+    });
+
+  } catch (error) {
+    console.error('Error registering hospital:', error);
+    res.status(500).json({ message: 'Server error while registering hospital.' });
+  }
+};
+
 module.exports = {
   loginHospital,
   getHospitalProfile,
   updateHospitalProfile,
-  changeHospitalPassword
+  changeHospitalPassword,
+  registerHospital
 };
+
 

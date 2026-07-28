@@ -2,10 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { 
   loginHospital, 
+  registerHospital,
   getHospitalProfile, 
   updateHospitalProfile, 
   changeHospitalPassword 
 } = require('../controllers/hospitalController');
+
+// @route   POST /api/hospitals/register
+// @desc    Register a new hospital
+router.post('/register', registerHospital);
 
 // @route   POST /api/hospitals/login
 // @desc    Login hospital
@@ -24,4 +29,5 @@ router.put('/profile', updateHospitalProfile);
 router.put('/password', changeHospitalPassword);
 
 module.exports = router;
+
 
