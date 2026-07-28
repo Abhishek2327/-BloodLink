@@ -1,30 +1,51 @@
 require('dotenv').config();
-const { Resend } = require('resend');
+//const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
+
 
 // Initialize Resend client
-let resend;
-if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_dummy_key_for_testing') {
-  console.log('⚠️  RESEND_API_KEY is missing or using placeholder in .env. Email service will run in development bypass mode.');
-} else {
-  resend = new Resend(process.env.RESEND_API_KEY);
-}
+//let resend;
+//if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_dummy_key_for_testing') {
+// console.log('⚠️  RESEND_API_KEY is missing or using placeholder in .env. Email service will run in development bypass mode.');
+//} else {
+//  resend = new Resend(process.env.RESEND_API_KEY);
+//}
+
+const transporter = nodemailer.createTransport({
+  host: process.env.BREVO_HOST,
+  port: Number(process.env.BREVO_PORT),
+  secure: false,
+  auth: {
+    user: process.env.BREVO_LOGIN,
+    pass: process.env.BREVO_SMTP_KEY,
+  },
+});
+
+
+
 
 const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuffer) => {
   // Check if Resend API key is configured
-  if (!resend) {
-    console.log('⚠️  RESEND_API_KEY not configured. Skipping email notification.');
-    console.log(`[DEVELOPMENT MODE] By-passed sending donation completion email to: ${donorEmail}`);
+  //if (!resend) {
+  // console.log('⚠️  RESEND_API_KEY not configured. Skipping email notification.');
+  // console.log(`[DEVELOPMENT MODE] By-passed sending donation completion email to: ${donorEmail}`);
+  //return false;
+  //}
+  if (!process.env.BREVO_SMTP_KEY) {
+    console.log("⚠️ Brevo SMTP key not configured.");
     return false;
   }
+
+
 
   // Convert PDF buffer to base64 for Resend attachment
   const pdfBase64 = certificateBuffer.toString('base64');
 
   try {
-    const response = await resend.emails.send({
-      from: 'BloodLink <onboarding@resend.dev>', // Update this with your verified domain
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
       to: donorEmail,
-      subject: '🎉 Thank You! Your Blood Donation is Complete - BloodLink',
+      subject: "🎉 Thank You! Your Blood Donation is Complete - BloodLink",
       html: `
       <!DOCTYPE html>
       <html lang="en">
@@ -101,33 +122,33 @@ const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuf
           <div class="header">
             <h1>🩸 BloodLink Una</h1>
           </div>
-          
+
           <div class="content">
             <div class="emoji">🎉</div>
             <h2 style="color: #6B1F1F; margin-bottom: 20px;">Dear ${donorName},</h2>
-            
+
             <div class="message">
               <p style="margin: 0; font-size: 16px;">
-                We <strong>heartfelt thank you</strong> for your noble act of blood donation. 
+                We <strong>heartfelt thank you</strong> for your noble act of blood donation.
                 Your contribution helps save lives and makes a real difference in our community.
               </p>
             </div>
 
             <p style="font-size: 15px; line-height: 1.8;">
-              We are delighted that you have successfully completed your blood donation. Your generosity 
-              and dedication serve as an inspiration to our community.
+              We are delighted that you have successfully completed your blood donation.
+              Your generosity and dedication serve as an inspiration to our community.
             </p>
 
             <div class="certificate-notice">
               <strong>📄 Blood Donation Certificate:</strong><br>
-              Your blood donation certificate is attached to this email. Please download and 
-              keep it safe for your records.
+              Your blood donation certificate is attached to this email.
+              Please download and keep it safe for your records.
             </div>
 
             <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin: 20px 0;">
               <strong>💝 Benefit:</strong><br>
               <p style="margin: 5px 0;">
-                <strong>FREE BLOOD (1 unit) for one year</strong> - 
+                <strong>FREE BLOOD (1 unit) for one year</strong> -
                 This benefit is available to you and your immediate family members.
               </p>
             </div>
@@ -150,14 +171,15 @@ const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuf
         </div>
       </body>
       </html>
-    `,
+      `,
       attachments: [
         {
           filename: `BloodDonationCertificate_${donorName}.pdf`,
-          content: pdfBase64
-        }
-      ]
+          content: certificateBuffer,
+        },
+      ],
     });
+
 
     console.log(`✅ Email successfully sent to ${donorEmail}`);
     return true;

@@ -1,15 +1,20 @@
 require('dotenv').config();
-const { Resend } = require('resend');
+
+const nodemailer = require('nodemailer');
 const Donor = require('../models/Donor');
 const jwt = require('jsonwebtoken');
-
-// Initialize Resend client
-if (!process.env.RESEND_API_KEY) {
-  console.error('❌ RESEND_API_KEY missing in .env');
-  process.exit(1);
-}
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+console.log("SMTP_HOST:", process.env.SMTP_HOST);
+console.log("SMTP_USER:", process.env.SMTP_USER);
+console.log("SMTP_PASS:", process.env.SMTP_PASS ? "Loaded ✅" : "Missing ❌");
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 // Complete registration after OTP verification
 const registerDonor = async (req, res) => {
@@ -83,63 +88,27 @@ const registerDonor = async (req, res) => {
 
 const sendOtpEmailService = async (email, otp) => {
   try {
-
-    if (
-      process.env.RESEND_API_KEY === "re_dummy_key_for_testing" ||
-      !process.env.RESEND_API_KEY
-    ) {
+    if (!process.env.SMTP_PASS) {
       console.log(`[DEV MODE] OTP for ${email} = ${otp}`);
       return;
     }
 
-    console.log("====================================");
-    console.log("Sending OTP email...");
-    console.log("Recipient:", email);
-    console.log("Sender: BloodLink <onboarding@resend.dev>");
-    console.log("Subject: Your OTP Code");
-    console.log(
-      "API Key exists:",
-      !!process.env.RESEND_API_KEY
-    );
-    console.log("====================================");
-
-    const response = await resend.emails.send({
-
-      from: "BloodLink <onboarding@resend.dev>",
-
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
       to: email,
-
       subject: "Your OTP Code",
-
       html: `
-      <h2>BloodLink Verification</h2>
-
-      <p>Your OTP is:</p>
-
-      <h1>${otp}</h1>
-
-      <p>Expires in 10 minutes.</p>
-      `
+        <h2>BloodLink Verification</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>Expires in 10 minutes.</p>
+      `,
     });
 
-    console.log("========== RESEND RESPONSE ==========");
-    console.dir(response, { depth: null });
-    console.log("====================================");
-
-    if (response.error) {
-      console.error("❌ RESEND ERROR");
-      console.dir(response.error, { depth: null });
-      throw response.error;
-    }
-
-    console.log("✅ Email accepted by Resend");
-
+    console.log(`✅ OTP email sent to ${email}`);
   } catch (err) {
-
     console.error("❌ Error sending OTP");
-
     console.dir(err, { depth: null });
-
     throw err;
   }
 };
