@@ -11,6 +11,7 @@ function HospitalLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -44,9 +45,29 @@ function HospitalLoginPage() {
     }
   };
 
+  const handleCopy = (text, type) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
+
+    const message = type === 'email' ? 'Email copied!' : 'Password copied!';
+    setToast(message);
+    setTimeout(() => {
+      setToast('');
+    }, 2500);
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center py-12 px-4 sm:px-6">
-      <div className="container mx-auto">
+      <div className="container mx-auto max-w-5xl space-y-6">
+        {/* Main Hospital Login Card */}
         <div className="flex flex-col md:grid md:grid-cols-2 gap-x-12 gap-y-8 items-center card-modern p-6 sm:p-8 md:p-12 max-w-5xl mx-auto animate-fade-in-up">
           
           <div className="w-full md:order-1">
@@ -169,10 +190,96 @@ function HospitalLoginPage() {
             </div>
           </div>
         </div>
+
+        {/* Demo Hospital Credentials Card */}
+        <div className="card-modern p-6 sm:p-8 max-w-5xl mx-auto relative animate-fade-in-up">
+          {/* Top-Right Badge */}
+          <div className="absolute top-6 right-6 sm:top-8 sm:right-8">
+            <span className="bg-red-50 text-red-600 text-xs font-semibold px-3 py-1 rounded-full border border-red-200 inline-flex items-center gap-1.5 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+              Demo Account
+            </span>
+          </div>
+
+          <div className="mb-6 pr-28 sm:pr-36">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+              <span>🏥</span> Demo Hospital Credentials
+            </h3>
+            <p className="text-gray-600 text-sm mt-1">
+              Use these demo credentials to explore the Hospital Dashboard and Blood Request Management features.
+            </p>
+          </div>
+
+          {/* Toast Notification */}
+          {toast && (
+            <div className="mb-4 bg-gray-900 text-white text-xs sm:text-sm font-medium px-4 py-2 rounded-lg shadow-md flex items-center space-x-2 animate-fade-in-up w-fit">
+              <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>{toast}</span>
+            </div>
+          )}
+
+          {/* Credentials Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Email
+              </label>
+              <div className="relative flex items-center">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value="stjude.hospital@bloodlink.com"
+                  className="input-modern pr-12 bg-gray-50 text-gray-800 font-medium cursor-pointer"
+                  onClick={() => handleCopy('stjude.hospital@bloodlink.com', 'email')}
+                />
+                <button 
+                  type="button"
+                  onClick={() => handleCopy('stjude.hospital@bloodlink.com', 'email')}
+                  className="absolute right-2 p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none"
+                  title="Copy Email"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Password
+              </label>
+              <div className="relative flex items-center">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value="StJude#2026"
+                  className="input-modern pr-12 bg-gray-50 text-gray-800 font-medium cursor-pointer"
+                  onClick={() => handleCopy('StJude#2026', 'password')}
+                />
+                <button 
+                  type="button"
+                  onClick={() => handleCopy('StJude#2026', 'password')}
+                  className="absolute right-2 p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none"
+                  title="Copy Password"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );
 }
 
 export default HospitalLoginPage;
+
 
