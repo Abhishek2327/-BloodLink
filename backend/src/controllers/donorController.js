@@ -546,10 +546,6 @@ const getHealthLogs = async (req, res) => {
 
 
 const demoLogin = async (req, res) => {
-  if (process.env.ENABLE_DEMO_LOGIN !== 'true') {
-    return res.status(403).json({ message: 'Demo login is disabled.' });
-  }
-
   try {
     const demoEmail = 'demo@bloodlink.com';
     let donor = await Donor.findOne({ email: demoEmail });

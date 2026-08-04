@@ -187,7 +187,6 @@ function DonorLoginModal({ isVisible, onClose }) {
                 )}
               </button>
 
-              {process.env.REACT_APP_ENABLE_DEMO_LOGIN === 'true' && (
                 <>
                   <div className="flex items-center my-4">
                     <div className="flex-grow border-t border-gray-300"></div>
@@ -206,7 +205,6 @@ function DonorLoginModal({ isVisible, onClose }) {
                     Explore BloodLink instantly without email verification.
                   </p>
                 </>
-              )}
             </form>
           </>
         ) : (
