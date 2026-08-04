@@ -1,20 +1,8 @@
 require('dotenv').config();
 
-const nodemailer = require('nodemailer');
+// Brevo API logic uses fetch inline.
 const Donor = require('../models/Donor');
 const jwt = require('jsonwebtoken');
-console.log("SMTP_HOST:", process.env.SMTP_HOST);
-console.log("SMTP_USER:", process.env.SMTP_USER);
-console.log("SMTP_PASS:", process.env.SMTP_PASS ? "Loaded ✅" : "Missing ❌");
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
 
 // Complete registration after OTP verification
 const registerDonor = async (req, res) => {
@@ -76,27 +64,50 @@ const registerDonor = async (req, res) => {
 
 const sendOtpEmailService = async (email, otp) => {
   try {
-    if (!process.env.SMTP_PASS) {
-      console.log(`[DEV MODE] OTP for ${email} = ${otp}`);
-      return;
-    }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to: email,
-      subject: "Your OTP Code",
-      html: `
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: process.env.BREVO_SENDER_NAME,
+          email: process.env.BREVO_SENDER_EMAIL
+        },
+        to: [
+          { email: email }
+        ],
+        subject: "Your OTP Code",
+        htmlContent: `
         <h2>BloodLink Verification</h2>
         <p>Your OTP is:</p>
         <h1>${otp}</h1>
         <p>Expires in 10 minutes.</p>
-      `,
+      `
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Brevo API Error (${response.status}): ${errorText}`);
+    }
 
     console.log(`✅ OTP email sent to ${email}`);
   } catch (err) {
     console.error("❌ Error sending OTP");
-    console.dir(err, { depth: null });
+    if (err.name === 'AbortError') {
+      console.error("Request to Brevo API timed out after 10 seconds.");
+    } else {
+      console.dir(err, { depth: null });
+    }
     throw err;
   }
 };

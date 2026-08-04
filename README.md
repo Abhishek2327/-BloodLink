@@ -12,7 +12,7 @@ BloodLink is a modern full-stack web application designed to bridge the gap betw
 *   **Certificate & Badge System**: Digital certificate generation (with PDF download benefits) and badges awarded to repeat donors.
 *   **Real-time Notifications**: Server-Sent Events (SSE) notifying donors instantly about emergency blood requests.
 *   **JWT Authentication**: Secure authentication using HTTP-only cookies.
-*   **Email Automation**: OTP verification and donation completion emails powered by Resend API.
+*   **Email Automation**: OTP verification and donation completion emails powered by Brevo HTTP API (Render-friendly).
 *   **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices.
 
 ---
@@ -37,7 +37,7 @@ BloodLink is a modern full-stack web application designed to bridge the gap betw
 *   **Node.js & Express.js**: RESTful API server.
 *   **MongoDB Atlas & Mongoose**: Cloud document database and object modeling.
 *   **JWT & Cookies**: Secure token-based authentication session handling.
-*   **Resend API**: High-deliverability transactional email delivery (with fallback in local development).
+*   **Brevo API**: High-deliverability transactional email delivery using HTTP endpoints.
 *   **PDFKit**: Dynamic PDF certificate generation.
 *   **bcrypt**: Password hashing for secure authentication.
 
@@ -83,9 +83,11 @@ Create a file named `.env` in the `backend/` directory:
 ```env
 PORT=5555
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/BloodLink?retryWrites=true&w=majority
-RESEND_API_KEY=your_resend_api_key_here
 FRONTEND_URL=https://bloodlink-drab.vercel.app
 NODE_ENV=development
+BREVO_API_KEY=your_brevo_api_key_here
+BREVO_SENDER_EMAIL=your_verified_email@example.com
+BREVO_SENDER_NAME=BloodLink
 ```
 
 ### Frontend (`frontend/.env`)
@@ -159,7 +161,7 @@ npm start
 3. Set **Root Directory** to `backend`.
 4. Build Command: `npm install`
 5. Start Command: `npm start`
-6. Add environment variables: `MONGODB_URI`, `RESEND_API_KEY`, `NODE_ENV=production`.
+6. Add environment variables: `MONGODB_URI`, `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `NODE_ENV=production`.
 
 ### Frontend (Vercel Deployment)
 1. Log in to [Vercel](https://vercel.com) and click **Add New Project**.

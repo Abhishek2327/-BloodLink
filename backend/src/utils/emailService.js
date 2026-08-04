@@ -1,29 +1,6 @@
 require('dotenv').config();
-//const { Resend } = require('resend');
-const nodemailer = require('nodemailer');
 
-
-// Initialize Resend client
-//let resend;
-//if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_dummy_key_for_testing') {
-// console.log('⚠️  RESEND_API_KEY is missing or using placeholder in .env. Email service will run in development bypass mode.');
-//} else {
-//  resend = new Resend(process.env.RESEND_API_KEY);
-//}
-
-const transporter = nodemailer.createTransport({
-  host: process.env.BREVO_HOST,
-  port: Number(process.env.BREVO_PORT),
-  secure: false,
-  auth: {
-    user: process.env.BREVO_LOGIN,
-    pass: process.env.BREVO_SMTP_KEY,
-  },
-});
-
-
-
-
+// Brevo API logic uses fetch inline.
 const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuffer) => {
   // Check if Resend API key is configured
   //if (!resend) {
@@ -31,10 +8,7 @@ const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuf
   // console.log(`[DEVELOPMENT MODE] By-passed sending donation completion email to: ${donorEmail}`);
   //return false;
   //}
-  if (!process.env.BREVO_SMTP_KEY) {
-    console.log("⚠️ Brevo SMTP key not configured.");
-    return false;
-  }
+
 
 
 
@@ -42,11 +16,26 @@ const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuf
   const pdfBase64 = certificateBuffer.toString('base64');
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to: donorEmail,
-      subject: "🎉 Thank You! Your Blood Donation is Complete - BloodLink",
-      html: `
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: process.env.BREVO_SENDER_NAME,
+          email: process.env.BREVO_SENDER_EMAIL
+        },
+        to: [
+          { email: donorEmail, name: donorName }
+        ],
+        subject: "🎉 Thank You! Your Blood Donation is Complete - BloodLink",
+        htmlContent: `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -172,19 +161,32 @@ const sendDonationCompletionEmail = async (donorEmail, donorName, certificateBuf
       </body>
       </html>
       `,
-      attachments: [
-        {
-          filename: `BloodDonationCertificate_${donorName}.pdf`,
-          content: certificateBuffer,
-        },
-      ],
+        attachment: [
+          {
+            name: `BloodDonationCertificate_${donorName}.pdf`,
+            content: pdfBase64
+          }
+        ]
+      }),
+      signal: controller.signal
     });
 
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Brevo API Error (${response.status}): ${errorText}`);
+    }
 
     console.log(`✅ Email successfully sent to ${donorEmail}`);
     return true;
   } catch (error) {
-    console.error('❌ Error sending email:', error);
+    console.error('❌ Error sending email:');
+    if (error.name === 'AbortError') {
+      console.error("Request to Brevo API timed out after 10 seconds.");
+    } else {
+      console.dir(error, { depth: null });
+    }
     throw error;
   }
 };

@@ -12,6 +12,16 @@ const cookieParser = require('cookie-parser');
 // Load environment variables
 dotenv.config();
 
+// Validate critical email environment variables at startup
+const requiredBrevoVars = ['BREVO_API_KEY', 'BREVO_SENDER_EMAIL', 'BREVO_SENDER_NAME'];
+const missingVars = requiredBrevoVars.filter(key => !process.env[key]);
+
+if (missingVars.length > 0) {
+    console.error(`❌ FATAL ERROR: Missing required Brevo environment variables: ${missingVars.join(', ')}`);
+    console.error('Please configure these in your .env file or hosting provider before starting the server.');
+    process.exit(1);
+}
+
 const app = express();
 
 // Trust proxy for Render deployment (needed for req.secure and x-forwarded-proto to work)
