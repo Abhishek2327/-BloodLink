@@ -59,19 +59,7 @@ const registerDonor = async (req, res) => {
     await donor.save();
 
     // Auto-login: Generate token and set cookie
-    const token = jwt.sign({ _id: donor._id }, "bloodlink.iiitu.2025");
-
-    // For production (HTTPS): secure: true, sameSite: 'none' (required for cross-origin)
-    // For development (HTTP): secure: false, sameSite: 'lax'
-    // Check if production: NODE_ENV or if request is secure (HTTPS)
-    const isProduction = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: isProduction, // true for HTTPS (production), false for HTTP (development)
-      sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin in production
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    generateTokenAndSetCookie(donor._id, req, res);
 
     // Return donor data for frontend
     res.status(200).json({
@@ -115,6 +103,18 @@ const sendOtpEmailService = async (email, otp) => {
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const generateTokenAndSetCookie = (donorId, req, res) => {
+  const token = jwt.sign({ _id: donorId }, "bloodlink.iiitu.2025");
+  const isProduction = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
 };
 
 // New endpoint: Send OTP for email verification during registration (only requires email)
@@ -264,19 +264,7 @@ const loginDonor = async (req, res) => {
     donor.otpExpires = undefined;
     await donor.save();
 
-    const token = jwt.sign({ _id: donor._id }, "bloodlink.iiitu.2025");
-
-    // For production (HTTPS): secure: true, sameSite: 'none' (required for cross-origin)
-    // For development (HTTP): secure: false, sameSite: 'lax'
-    // Check if production: NODE_ENV or if request is secure (HTTPS)
-    const isProduction = process.env.NODE_ENV === 'production' || req.secure || req.headers['x-forwarded-proto'] === 'https';
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: isProduction, // true for HTTPS (production), false for HTTP (development)
-      sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin in production
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    generateTokenAndSetCookie(donor._id, req, res);
 
     // Return the full donor object on successful login.
     res.status(200).json(donor);
@@ -557,12 +545,45 @@ const getHealthLogs = async (req, res) => {
 };
 
 
+const demoLogin = async (req, res) => {
+  if (process.env.ENABLE_DEMO_LOGIN !== 'true') {
+    return res.status(403).json({ message: 'Demo login is disabled.' });
+  }
+
+  try {
+    const demoEmail = 'demo@bloodlink.com';
+    let donor = await Donor.findOne({ email: demoEmail });
+
+    if (!donor) {
+      donor = new Donor({
+        fullName: 'Demo User',
+        contactNumber: '9999999999',
+        email: demoEmail,
+        bloodGroup: 'O+',
+        age: 25,
+        gender: 'Male',
+        location: 'Demo City',
+        isAvailable: true
+      });
+      await donor.save();
+    }
+
+    generateTokenAndSetCookie(donor._id, req, res);
+
+    res.status(200).json(donor);
+  } catch (error) {
+    console.error('Error in demoLogin:', error);
+    res.status(500).json({ message: 'Server error during demo login.' });
+  }
+};
+
 module.exports = {
   registerDonor,
   sendRegistrationOTP,
   verifyRegistrationOTP,
   sendOTP,
   loginDonor,
+  demoLogin,
   getAvailableDonors,
   updateAvailability,
   getDonorById,

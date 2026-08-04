@@ -87,6 +87,37 @@ function DonorLoginModal({ isVisible, onClose }) {
     }
   };
 
+  const handleDemoLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/donors/demo-login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Demo Login failed. Please try again.');
+        }
+        
+        login({ type: 'donor', ...data });
+        handleClose();
+        navigate('/donor-dashboard');
+
+    } catch (err) {
+        setError(err.message);
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-center items-center p-4"
@@ -155,6 +186,27 @@ function DonorLoginModal({ isVisible, onClose }) {
                   'Send OTP'
                 )}
               </button>
+
+              {process.env.REACT_APP_ENABLE_DEMO_LOGIN === 'true' && (
+                <>
+                  <div className="flex items-center my-4">
+                    <div className="flex-grow border-t border-gray-300"></div>
+                    <span className="px-3 text-sm text-gray-500 font-semibold">OR</span>
+                    <div className="flex-grow border-t border-gray-300"></div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDemoLogin}
+                    disabled={isLoading}
+                    className="w-full px-4 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    🚀 Login as Demo
+                  </button>
+                  <p className="text-xs text-gray-500 text-center mt-3">
+                    Explore BloodLink instantly without email verification.
+                  </p>
+                </>
+              )}
             </form>
           </>
         ) : (

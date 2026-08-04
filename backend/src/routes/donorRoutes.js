@@ -7,6 +7,7 @@ const {
     verifyRegistrationOTP,
     sendOTP,
     loginDonor, 
+    demoLogin,
     getAvailableDonors, 
     updateAvailability,
     getDonorById,
@@ -30,6 +31,8 @@ router.post('/register', registerDonor);
 router.post('/send-otp', sendOTP);
 
 router.post('/login', loginDonor);
+
+router.post('/demo-login', demoLogin);
 
 router.get('/available', getAvailableDonors);
 
