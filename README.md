@@ -12,7 +12,7 @@ BloodLink is a modern full-stack web application designed to bridge the gap betw
 *   **Certificate & Badge System**: Digital certificate generation (with PDF download benefits) and badges awarded to repeat donors.
 *   **Real-time Notifications**: Server-Sent Events (SSE) notifying donors instantly about emergency blood requests.
 *   **JWT Authentication**: Secure authentication using HTTP-only cookies.
-*   **Email Automation**: OTP verification and donation completion emails powered by Brevo HTTP API (Render-friendly).
+*   **Email Automation**: OTP verification and donation completion emails powered by Gmail SMTP.
 *   **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices.
 
 ---
